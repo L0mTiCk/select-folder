@@ -1,5 +1,5 @@
 {
-	"name": "select-folder",
+	"name": "select_folder",
 	"version": "0.1.2",
 	"description": "Finder-like behavior for the Obsidian file explorer.",
 	"main": "main.js",

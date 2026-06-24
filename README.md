@@ -52,7 +52,7 @@ the selection.)
 ### Manual
 
 1. Download `main.js`, `manifest.json`, and `styles.css` from a release.
-2. Copy them into `<your vault>/.obsidian/plugins/select-folder/`.
+2. Copy them into `<your vault>/.obsidian/plugins/select_folder/`.
 3. In Obsidian, open **Settings → Community plugins**, reload, and enable
    **Select Folder**.
 

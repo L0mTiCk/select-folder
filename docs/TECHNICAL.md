@@ -99,4 +99,4 @@ npm run build    # tsc -noEmit type-check + production esbuild bundle
 `main.js` is a generated esbuild bundle of `src/`. After editing `src/*.ts`,
 **always rebuild** so `main.js` (the file Obsidian actually loads) reflects the
 change. Deploy by copying/symlinking `main.js`, `manifest.json`, and
-`styles.css` into `<vault>/.obsidian/plugins/select-folder/`.
+`styles.css` into `<vault>/.obsidian/plugins/select_folder/`.

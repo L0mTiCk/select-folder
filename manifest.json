@@ -1,5 +1,5 @@
 {
-	"id": "select-folder",
+	"id": "select_folder",
 	"name": "Select Folder",
 	"version": "0.1.2",
 	"minAppVersion": "1.4.0",
