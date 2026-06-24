@@ -135,8 +135,16 @@ export default class FinderTreeExplorerPlugin extends Plugin {
 	}
 
 	private onExplorerClick(leaf: WorkspaceLeaf, evt: MouseEvent) {
-		// Only left-click selects; let modified clicks / middle-click pass.
-		if (evt.button !== 0 || evt.metaKey || evt.ctrlKey || evt.shiftKey) {
+		// Only a plain left-click selects. Any modifier (Cmd/Ctrl toggle,
+		// Shift range, Option/Alt add-remove) or middle-click is a native
+		// multi-select gesture — let it through untouched.
+		if (
+			evt.button !== 0 ||
+			evt.metaKey ||
+			evt.ctrlKey ||
+			evt.shiftKey ||
+			evt.altKey
+		) {
 			return;
 		}
 
