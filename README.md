@@ -9,18 +9,29 @@ Folder** fixes that by enhancing the built-in explorer in place: drag-and-drop,
 the right-click menu, multi-select, and live vault sync all keep working exactly
 as before.
 
-## Features
+## What it does
+
+**The core idea: clicking a folder's *name* selects it** — the way Finder,
+Files, and most OS file managers behave — instead of just toggling it open and
+shut.
 
 - **Click a folder's name to select it.** The folder highlights using
-  Obsidian's native selection style.
+  Obsidian's native selection style. This is the whole point of the plugin.
 - **The triangle still expands/collapses.** Click the `>` icon for the usual
   behavior — nothing changes there.
-- **New notes land in the selected folder.** With a folder selected, your normal
-  *Create new note* shortcut (`Cmd`/`Ctrl`+N) creates the note inside it instead
-  of the default location. No new hotkey to learn.
 - **Native multi-select is untouched.** `Shift`+click (range),
   `Cmd`/`Ctrl`+click and `Option`+click (add/remove) all work just like stock
   Obsidian.
+
+### Bonus: new notes follow the selection
+
+Once a folder is selected, it's natural to want new notes to land there — so
+your normal *Create new note* shortcut (`Cmd`/`Ctrl`+N) creates the note inside
+the selected folder instead of the default location. No new hotkey, and you can
+turn it off in settings if you'd rather keep Obsidian's default. (If you only
+want "new note in a folder," Obsidian's right-click menu and a few existing
+plugins already cover that — here it's just a convenience that rides along with
+the selection.)
 
 ## At a glance
 
