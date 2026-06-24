@@ -1,0 +1,4 @@
+/*
+ * No custom styles needed: folder selection reuses Obsidian's native
+ * `.has-focus` tree-item state, which the app already styles.
+ */
