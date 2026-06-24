@@ -2,6 +2,19 @@
 
 All notable changes to this plugin are documented here.
 
+## 0.1.2
+
+### Fixed
+
+- **Plain-clicking a folder now exits multi-select mode.** After selecting
+  several items, a plain (no-modifier) click on a folder left the previous
+  selection highlighted — you stayed stuck in multi-select. Obsidian's native
+  plain click calls `clearSelectedDoms()` before collapsing, but our capture-
+  phase interceptor suppressed that handler. `onExplorerClick` now clears the
+  multi-selection itself and sets the clicked folder as the range anchor
+  (`tree.activeDom`), so a following `Shift`/`Option` click extends from it —
+  matching native behavior.
+
 ## 0.1.1
 
 ### Fixed

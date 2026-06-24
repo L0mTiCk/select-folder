@@ -66,7 +66,22 @@ narrow local interfaces (`TreeItem`, `ExplorerTree`, `FileExplorerView`,
   its tree item.
 - `FileExplorerView.tree.focusedItem` / `tree.setFocusedItem(item, scroll?)` —
   the native single-item focus state.
+- `FileExplorerView.tree.clearSelectedDoms()` — empties the multi-selection and
+  removes the `is-selected` highlight; we call it on a plain folder click to
+  replicate what native does (otherwise you stay stuck in multi-select mode).
+- `FileExplorerView.tree.activeDom` — the anchor a subsequent `Shift`/`Option`
+  range-select extends from; we set it to the clicked folder, as native does.
 - `app.fileManager.getNewFileParent(sourcePath)` — patched per above.
+
+### Reverse-engineering reference
+
+Because these internals are undocumented, the relevant slice of Obsidian's
+minified renderer (`tree.handleItemSelection` and friends) was extracted from
+`obsidian.asar` and de-minified into annotated notes. That material lives in a
+**local, gitignored `reverse/` folder** (`reverse/NOTES.md` for the annotated
+walkthrough, `reverse/snippets.txt` for verbatim evidence, `reverse/obsidian-app.js`
+for the full bundle) — it is kept out of version control but on hand as context
+for future changes. Captured against Obsidian **1.12.7**.
 
 ## Styling
 

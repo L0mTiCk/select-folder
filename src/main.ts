@@ -28,7 +28,11 @@ interface TreeItem {
 /** Minimal shape of the explorer's internal tree. */
 interface ExplorerTree {
 	focusedItem: TreeItem | null;
+	/** Anchor item used to extend Shift / Option range-selections. */
+	activeDom: TreeItem | null;
 	setFocusedItem(item: TreeItem | null, scrollIntoView?: boolean): void;
+	/** Clears the multi-selection: removes `is-selected` and empties the set. */
+	clearSelectedDoms(): void;
 }
 
 /** Minimal shape of the internal file-explorer view. */
@@ -168,7 +172,16 @@ export default class FinderTreeExplorerPlugin extends Plugin {
 		evt.preventDefault();
 
 		const view = leaf.view as FileExplorerView;
-		view.tree?.setFocusedItem(item, false);
+		const tree = view.tree;
+		// A plain click is a single-select. Obsidian's native plain click calls
+		// clearSelectedDoms() before collapsing; since we suppress that native
+		// handler, we must clear the multi-selection ourselves — otherwise the
+		// highlighted rows linger and you stay stuck in multi-select mode.
+		tree?.clearSelectedDoms?.();
+		tree?.setFocusedItem(item, false);
+		// Make this folder the range anchor (native sets `activeDom` here too),
+		// so a following Shift / Option click extends from this folder.
+		if (tree) tree.activeDom = item;
 		// Focus the explorer pane so its keyboard scope (F2/Enter rename) is live.
 		this.app.workspace.setActiveLeaf(leaf, { focus: true });
 	}
