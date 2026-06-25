@@ -70,11 +70,11 @@ export default class SelectFolderPlugin extends Plugin {
 	}
 
 	async loadSettings() {
-		this.settings = Object.assign(
-			{},
-			DEFAULT_SETTINGS,
-			await this.loadData(),
-		);
+		const data = (await this.loadData()) as
+			| Partial<SelectFolderSettings>
+			| null
+			| undefined;
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, data);
 	}
 
 	async saveSettings() {
@@ -100,18 +100,23 @@ export default class SelectFolderPlugin extends Plugin {
 	// ---- B. getNewFileParent patch ------------------------------------
 
 	private patchGetNewFileParent() {
-		const plugin = this;
 		const fileManager = this.app
 			.fileManager as unknown as PatchableFileManager;
+
+		// Resolved via a lexical arrow so we don't alias `this` to a local:
+		// inside the patched function below, `this` is the FileManager.
+		const overrideParent = (): TFolder | null =>
+			this.settings.newNotesInSelectedFolder
+				? this.focusedFolder()
+				: null;
 
 		const uninstall = around(fileManager, {
 			getNewFileParent(original) {
 				return function (this: unknown, sourcePath: string): TFolder {
-					if (plugin.settings.newNotesInSelectedFolder) {
-						const folder = plugin.focusedFolder();
-						if (folder) return folder;
-					}
-					return original.call(this, sourcePath);
+					return (
+						overrideParent() ??
+						(original.call(this, sourcePath) as TFolder)
+					);
 				};
 			},
 		});
