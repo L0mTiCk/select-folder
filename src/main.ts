@@ -8,8 +8,8 @@ import {
 } from "obsidian";
 import {
 	DEFAULT_SETTINGS,
-	FinderTreeSettingTab,
-	type FinderTreeSettings,
+	SelectFolderSettingTab,
+	type SelectFolderSettings,
 } from "./settings";
 
 const FILE_EXPLORER_TYPE = "file-explorer";
@@ -46,15 +46,16 @@ interface PatchableFileManager {
 	getNewFileParent(sourcePath: string): TFolder;
 }
 
-export default class FinderTreeExplorerPlugin extends Plugin {
-	settings: FinderTreeSettings;
+export default class SelectFolderPlugin extends Plugin {
+	// Assigned in onload() via loadSettings(), before any other use.
+	settings!: SelectFolderSettings;
 
 	/** Leaves we have attached our click interceptor to. */
 	private patchedLeaves = new WeakSet<WorkspaceLeaf>();
 
 	async onload() {
 		await this.loadSettings();
-		this.addSettingTab(new FinderTreeSettingTab(this.app, this));
+		this.addSettingTab(new SelectFolderSettingTab(this.app, this));
 
 		// B. Re-route "new file" location to the focused folder.
 		this.patchGetNewFileParent();

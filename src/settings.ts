@@ -1,19 +1,19 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
-import type FinderTreeExplorerPlugin from "./main";
+import type SelectFolderPlugin from "./main";
 
-export interface FinderTreeSettings {
+export interface SelectFolderSettings {
 	/** When ON and a folder is focused, new notes are created inside it. */
 	newNotesInSelectedFolder: boolean;
 }
 
-export const DEFAULT_SETTINGS: FinderTreeSettings = {
+export const DEFAULT_SETTINGS: SelectFolderSettings = {
 	newNotesInSelectedFolder: true,
 };
 
-export class FinderTreeSettingTab extends PluginSettingTab {
-	plugin: FinderTreeExplorerPlugin;
+export class SelectFolderSettingTab extends PluginSettingTab {
+	plugin: SelectFolderPlugin;
 
-	constructor(app: App, plugin: FinderTreeExplorerPlugin) {
+	constructor(app: App, plugin: SelectFolderPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
