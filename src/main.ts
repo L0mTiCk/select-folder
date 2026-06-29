@@ -117,8 +117,7 @@ export default class SelectFolderPlugin extends Plugin {
 			getNewFileParent(original) {
 				return function (this: unknown, sourcePath: string): TFolder {
 					return (
-						overrideParent() ??
-						(original.call(this, sourcePath) as TFolder)
+						overrideParent() ?? original.call(this, sourcePath)
 					);
 				};
 			},
@@ -176,10 +175,13 @@ export default class SelectFolderPlugin extends Plugin {
 		const folderTitle = target.closest<HTMLElement>(".nav-folder-title");
 		if (!folderTitle) return; // files and empty space: native behavior.
 
-		// Clicking the ">" triangle — plus a configurable margin to its right —
-		// expands/collapses as usual. The triangle itself is tiny, so this
-		// widens its hit area. Clicks past the margin (on the name) select.
-		if (this.clickedOnExpandToggle(folderTitle, evt)) return;
+		const toggleMode = this.settings.clickMode === "toggle";
+
+		// "select" mode: clicking the ">" triangle — plus a configurable margin
+		// to its right — expands/collapses as usual (the triangle is tiny, so
+		// this widens its hit area); clicks past the margin select. "toggle"
+		// mode treats the whole row as one control, so we never defer to native.
+		if (!toggleMode && this.clickedOnExpandToggle(folderTitle, evt)) return;
 
 		// A folder name was clicked. Suppress the default collapse-toggle and
 		// instead make this folder the tree's focused item — the same native
@@ -204,9 +206,21 @@ export default class SelectFolderPlugin extends Plugin {
 		if (tree) tree.activeDom = item;
 		// Focus the explorer pane so its keyboard scope (F2/Enter rename) is live.
 		this.app.workspace.setActiveLeaf(leaf, { focus: true });
+
+		// "toggle" mode: the same click also folds. Every click toggles so rapid
+		// clicking stays responsive (no `detail` guard — suppressing the 2nd/3rd
+		// click of a fast sequence made folding feel sticky). A double-click is
+		// just two toggles; onExplorerDblClick bails in this mode so it adds none.
+		if (toggleMode && typeof item.setCollapsed === "function") {
+			item.setCollapsed(!item.collapsed, true);
+		}
 	}
 
 	private onExplorerDblClick(leaf: WorkspaceLeaf, evt: MouseEvent) {
+		// In "toggle" mode a single click already folds, so a double-click has
+		// no extra role — let its two clicks act without adding a third toggle.
+		if (this.settings.clickMode === "toggle") return;
+
 		// Mirror the single-click modifier guard: any modifier or non-left
 		// button is a native gesture, so we stay out of the way.
 		if (

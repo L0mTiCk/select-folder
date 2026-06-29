@@ -2,6 +2,21 @@
 
 All notable changes to this plugin are documented here.
 
+## 0.2.1
+
+### Added
+
+- **Click modes.** A new setting chooses what a single click on a folder name
+  does: **Select** (default — select only, non-destructive; the triangle or a
+  double-click folds) or **Select + expand/collapse** (the whole row is one
+  control — a single click both selects and toggles, with every click staying
+  responsive). Settings are now grouped into two sections.
+
+### Fixed
+
+- Dropped a `TFolder` cast in favor of `instanceof`-safe typing, and removed the
+  deprecated `setDynamicTooltip()` slider call.
+
 ## 0.1.5
 
 ### Added
