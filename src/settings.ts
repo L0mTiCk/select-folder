@@ -4,7 +4,7 @@ import type SelectFolderPlugin from "./main";
 /**
  * How a plain single click on a folder's name behaves:
  * - `select`: select only — non-destructive. The triangle (or a double-click)
- *   handles folding. This is the plugin's original Finder-style behavior.
+ *   handles folding. This is the plugin's original behavior.
  * - `toggle`: the whole row is one control — a single click both selects AND
  *   expands/collapses, with the triangle and the name behaving the same.
  */

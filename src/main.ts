@@ -63,7 +63,7 @@ export default class SelectFolderPlugin extends Plugin {
 		// B. Re-route "new file" location to the focused folder.
 		this.patchGetNewFileParent();
 
-		// A. Attach the Finder-style click interceptor to the explorer(s).
+		// A. Attach the click interceptor to the explorer(s).
 		this.app.workspace.onLayoutReady(() => this.attachToExplorers());
 		this.registerEvent(
 			this.app.workspace.on("layout-change", () =>
@@ -126,7 +126,7 @@ export default class SelectFolderPlugin extends Plugin {
 		this.register(uninstall);
 	}
 
-	// ---- A. Finder-style click handling -------------------------------
+	// ---- A. Click handling --------------------------------------------
 
 	private attachToExplorers() {
 		for (const leaf of this.app.workspace.getLeavesOfType(
@@ -143,7 +143,7 @@ export default class SelectFolderPlugin extends Plugin {
 				containerEl.removeEventListener("click", handler, true),
 			);
 
-			// Double-click a folder name to expand/collapse it, Finder-style.
+			// Double-click a folder name to expand/collapse it.
 			const dblHandler = (evt: MouseEvent) =>
 				this.onExplorerDblClick(leaf, evt);
 			containerEl.addEventListener("dblclick", dblHandler, true);
@@ -246,7 +246,7 @@ export default class SelectFolderPlugin extends Plugin {
 		const item = this.resolveItem(leaf, folderTitle);
 		if (!item || typeof item.setCollapsed !== "function") return;
 
-		// Double-click on the name toggles fold state, Finder-style. The two
+		// Double-click on the name toggles fold state. The two
 		// single-clicks of the gesture have already selected the folder; this
 		// just adds the open/close. preventDefault suppresses the native text
 		// selection that a double-click would otherwise trigger.

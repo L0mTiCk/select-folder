@@ -23,7 +23,7 @@ All notable changes to this plugin are documented here.
 
 - **Double-click a folder name to expand/collapse it.** A single click still
   selects the folder (non-destructive); a double-click on the name now toggles
-  its fold state, Finder-style. The triangle's hit area keeps its native
+  its fold state. The triangle's hit area keeps its native
   behavior on both single and double click.
 
 ## 0.1.2

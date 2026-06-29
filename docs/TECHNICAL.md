@@ -6,17 +6,17 @@ see [`README.md`](../README.md); for the release history see
 
 ## Goal
 
-Give Obsidian's built-in `file-explorer` view Finder-like behavior **without
-replacing it**, so drag-and-drop, the context menu, and live vault sync all keep
-working. The plugin layers two small, cleanly-uninstallable patches on top of
-the stock explorer.
+Let Obsidian's built-in `file-explorer` view **select a folder on click**
+**without replacing it**, so drag-and-drop, the context menu, and live vault
+sync all keep working. The plugin layers two small, cleanly-uninstallable
+patches on top of the stock explorer.
 
 ## Architecture
 
 The plugin touches the explorer in two places, both registered in `onload` and
 torn down automatically when the plugin is disabled.
 
-### A. Finder-style click handling
+### A. Click handling
 
 A **capture-phase** `click` listener is attached to each file-explorer leaf's
 `containerEl` (`attachToExplorers` / `onExplorerClick`). Capture phase lets it

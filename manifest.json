@@ -3,7 +3,7 @@
 	"name": "Select Folder",
 	"version": "0.2.1",
 	"minAppVersion": "1.4.0",
-	"description": "Finder-like behavior for the file explorer: click the triangle to expand, click a folder to select it, and create new notes inside the selected folder.",
+	"description": "Click a folder to select it in the file explorer instead of just expanding it, and optionally create new notes inside the selected folder.",
 	"author": "frog",
 	"isDesktopOnly": false
 }

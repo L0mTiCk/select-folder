@@ -1,7 +1,7 @@
 # Select Folder
 
-Click a folder to **select** it — like Finder — without losing anything
-Obsidian's file explorer already does.
+Click a folder to **select** it — without losing anything Obsidian's file
+explorer already does.
 
 Stock Obsidian only expands/collapses a folder when you click its name, with no
 lightweight way to say "I'm working in *this* folder." Select Folder fixes that
@@ -13,7 +13,7 @@ keep working.
 - **Click a folder's name to select it** — native selection highlight. This is
   the whole point.
 - **The triangle still expands/collapses** — unchanged.
-- **Double-click a folder name to expand/collapse it**, Finder-style.
+- **Double-click a folder name to expand/collapse it.**
 - **Multi-select is untouched** — `Shift` / `Cmd` / `Ctrl` / `Option`+click all
   behave exactly as in stock Obsidian.
 
