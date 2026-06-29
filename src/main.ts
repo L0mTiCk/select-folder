@@ -23,6 +23,9 @@ interface TreeItem {
 	file?: TAbstractFile;
 	selfEl?: HTMLElement;
 	el?: HTMLElement;
+	/** FolderItem only: current fold state and its toggle. */
+	collapsed?: boolean;
+	setCollapsed?(collapsed: boolean, animate?: boolean): void;
 }
 
 /** Minimal shape of the explorer's internal tree. */
@@ -140,6 +143,15 @@ export default class SelectFolderPlugin extends Plugin {
 			this.register(() =>
 				containerEl.removeEventListener("click", handler, true),
 			);
+
+			// Double-click a folder name to expand/collapse it, Finder-style.
+			const dblHandler = (evt: MouseEvent) =>
+				this.onExplorerDblClick(leaf, evt);
+			containerEl.addEventListener("dblclick", dblHandler, true);
+			this.register(() =>
+				containerEl.removeEventListener("dblclick", dblHandler, true),
+			);
+
 			this.patchedLeaves.add(leaf);
 		}
 	}
@@ -161,11 +173,13 @@ export default class SelectFolderPlugin extends Plugin {
 		const target = evt.target as HTMLElement | null;
 		if (!target) return;
 
-		// Clicking the ">" triangle: let Obsidian expand/collapse as usual.
-		if (target.closest(".collapse-icon")) return;
-
 		const folderTitle = target.closest<HTMLElement>(".nav-folder-title");
 		if (!folderTitle) return; // files and empty space: native behavior.
+
+		// Clicking the ">" triangle — plus a configurable margin to its right —
+		// expands/collapses as usual. The triangle itself is tiny, so this
+		// widens its hit area. Clicks past the margin (on the name) select.
+		if (this.clickedOnExpandToggle(folderTitle, evt)) return;
 
 		// A folder name was clicked. Suppress the default collapse-toggle and
 		// instead make this folder the tree's focused item — the same native
@@ -190,6 +204,56 @@ export default class SelectFolderPlugin extends Plugin {
 		if (tree) tree.activeDom = item;
 		// Focus the explorer pane so its keyboard scope (F2/Enter rename) is live.
 		this.app.workspace.setActiveLeaf(leaf, { focus: true });
+	}
+
+	private onExplorerDblClick(leaf: WorkspaceLeaf, evt: MouseEvent) {
+		// Mirror the single-click modifier guard: any modifier or non-left
+		// button is a native gesture, so we stay out of the way.
+		if (
+			evt.button !== 0 ||
+			evt.metaKey ||
+			evt.ctrlKey ||
+			evt.shiftKey ||
+			evt.altKey
+		) {
+			return;
+		}
+
+		const target = evt.target as HTMLElement | null;
+		if (!target) return;
+
+		const folderTitle = target.closest<HTMLElement>(".nav-folder-title");
+		if (!folderTitle) return;
+
+		// Double-clicking the triangle's hit area keeps the native behavior —
+		// the single-click handler already let it through, so do the same here.
+		if (this.clickedOnExpandToggle(folderTitle, evt)) return;
+
+		const item = this.resolveItem(leaf, folderTitle);
+		if (!item || typeof item.setCollapsed !== "function") return;
+
+		// Double-click on the name toggles fold state, Finder-style. The two
+		// single-clicks of the gesture have already selected the folder; this
+		// just adds the open/close. preventDefault suppresses the native text
+		// selection that a double-click would otherwise trigger.
+		evt.preventDefault();
+		evt.stopPropagation();
+		item.setCollapsed(!item.collapsed, true);
+	}
+
+	/**
+	 * Whether the event lands on the fold triangle or the configurable margin
+	 * to its right — the area reserved for native expand/collapse. Returns
+	 * false (i.e. "this is the name") when the row has no triangle.
+	 */
+	private clickedOnExpandToggle(
+		folderTitle: HTMLElement,
+		evt: MouseEvent,
+	): boolean {
+		const icon = folderTitle.querySelector<HTMLElement>(".collapse-icon");
+		if (!icon) return false;
+		const rect = icon.getBoundingClientRect();
+		return evt.clientX <= rect.right + this.settings.expandHitAreaPx;
 	}
 
 	/** Map a `.nav-folder-title` element back to its tree item. */
