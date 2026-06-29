@@ -39,6 +39,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           tag="${GITHUB_REF#refs/tags/}"
+          # Refresh any existing (draft) release for this tag, so re-pushing a
+          # tag re-runs cleanly instead of failing on "release already exists".
+          # --cleanup-tag is omitted so the git tag itself is kept.
+          gh release delete "$tag" --yes 2>/dev/null || true
           gh release create "$tag" \
             --title="$tag" \
             --draft \
