@@ -1,9 +1,14 @@
 import { around } from "monkey-around";
 import {
+	App,
+	Modal,
+	Notice,
 	Plugin,
+	Setting,
 	TFolder,
 	View,
 	WorkspaceLeaf,
+	normalizePath,
 	type TAbstractFile,
 } from "obsidian";
 import {
@@ -62,6 +67,13 @@ export default class SelectFolderPlugin extends Plugin {
 
 		// B. Re-route "new file" location to the focused folder.
 		this.patchGetNewFileParent();
+
+		// C. "Create new folder here" command for the focused folder.
+		this.addCommand({
+			id: "create-folder-in-selected-folder",
+			name: "Create new folder in selected folder",
+			callback: () => this.promptForNewFolder(),
+		});
 
 		// A. Attach the click interceptor to the explorer(s).
 		this.app.workspace.onLayoutReady(() => this.attachToExplorers());
@@ -124,6 +136,60 @@ export default class SelectFolderPlugin extends Plugin {
 		});
 
 		this.register(uninstall);
+	}
+
+	// ---- C. New folder command ----------------------------------------
+
+	private promptForNewFolder() {
+		const parent = this.settings.newFoldersInSelectedFolder
+			? (this.focusedFolder() ?? this.app.vault.getRoot())
+			: this.app.vault.getRoot();
+		new NewFolderModal(this.app, parent, (name) =>
+			void this.createFolderIn(parent, name),
+		).open();
+	}
+
+	private async createFolderIn(parent: TFolder, name: string) {
+		const path = normalizePath(
+			parent.isRoot() ? name : `${parent.path}/${name}`,
+		);
+		let folder: TFolder;
+		try {
+			folder = await this.app.vault.createFolder(path);
+		} catch (e) {
+			const reason = e instanceof Error ? e.message : String(e);
+			new Notice(`Could not create folder "${name}": ${reason}`);
+			return;
+		}
+		if (this.settings.focusNewFolder) this.focusFolder(folder);
+	}
+
+	/**
+	 * Make a folder the explorer's focused item — same native selection state
+	 * as a plain click on its name, so "new note here" targets it right away.
+	 * Also expands the ancestor chain and the folder itself, otherwise a note
+	 * created right after lands inside a collapsed folder and is invisible.
+	 */
+	private focusFolder(folder: TFolder) {
+		const leaves =
+			this.app.workspace.getLeavesOfType(FILE_EXPLORER_TYPE);
+		for (const leaf of leaves) {
+			const view = leaf.view as FileExplorerView;
+			const tree = view.tree;
+			const fileItems = view.fileItems;
+			const item = fileItems?.[folder.path];
+			if (!tree || !fileItems || !item) continue;
+			let ancestor: TFolder | null = folder.parent;
+			while (ancestor && !ancestor.isRoot()) {
+				fileItems[ancestor.path]?.setCollapsed?.(false, true);
+				ancestor = ancestor.parent;
+			}
+			tree.clearSelectedDoms?.();
+			tree.setFocusedItem(item, true);
+			tree.activeDom = item;
+			item.setCollapsed?.(false, true);
+		}
+		if (leaves[0]) this.app.workspace.setActiveLeaf(leaves[0], { focus: true });
 	}
 
 	// ---- A. Click handling --------------------------------------------
@@ -280,5 +346,69 @@ export default class SelectFolderPlugin extends Plugin {
 		const view = leaf.view as FileExplorerView;
 		const item = view.fileItems?.[path];
 		return item && item.file instanceof TFolder ? item : null;
+	}
+}
+
+/** Prompt for a folder name, then hand it back to the plugin to create. */
+class NewFolderModal extends Modal {
+	private readonly parent: TFolder;
+	private readonly onSubmit: (name: string) => void;
+	private name = "";
+
+	constructor(app: App, parent: TFolder, onSubmit: (name: string) => void) {
+		super(app);
+		this.parent = parent;
+		this.onSubmit = onSubmit;
+	}
+
+	onOpen() {
+		const { contentEl } = this;
+		contentEl.empty();
+
+		const location = this.parent.isRoot() ? "/" : this.parent.path;
+		this.setTitle(`New folder in "${location}"`);
+
+		new Setting(contentEl).setName("Folder name").addText((text) => {
+			text
+				.setPlaceholder("Folder name")
+				.setValue(this.name)
+				.onChange((value) => {
+					this.name = value;
+				});
+			// Focus + Enter-to-submit for keyboard flow.
+			text.inputEl.focus();
+			text.inputEl.select();
+			text.inputEl.addEventListener("keydown", (evt) => {
+				if (evt.key === "Enter") {
+					evt.preventDefault();
+					this.submit();
+				}
+			});
+		});
+
+		new Setting(contentEl).addButton((button) =>
+			button
+				.setButtonText("Create folder")
+				.setCta()
+				.onClick(() => this.submit()),
+		);
+	}
+
+	private submit() {
+		const name = this.name.trim();
+		if (!name) {
+			new Notice("Enter a folder name");
+			return;
+		}
+		if (name.includes("/")) {
+			new Notice("Folder name cannot contain slashes");
+			return;
+		}
+		this.close();
+		this.onSubmit(name);
+	}
+
+	onClose() {
+		this.contentEl.empty();
 	}
 }

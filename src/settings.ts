@@ -15,6 +15,10 @@ export interface SelectFolderSettings {
 	clickMode: FolderClickMode;
 	/** When ON and a folder is focused, new notes are created inside it. */
 	newNotesInSelectedFolder: boolean;
+	/** When ON and a folder is focused, new folders are created inside it. */
+	newFoldersInSelectedFolder: boolean;
+	/** When ON, the folder just created by the plugin becomes selected. */
+	focusNewFolder: boolean;
 	/**
 	 * Extra width (px) added to the RIGHT of the fold triangle that still
 	 * counts as an expand/collapse click. Larger = the small ▶ is easier to
@@ -26,6 +30,8 @@ export interface SelectFolderSettings {
 export const DEFAULT_SETTINGS: SelectFolderSettings = {
 	clickMode: "select",
 	newNotesInSelectedFolder: true,
+	newFoldersInSelectedFolder: true,
+	focusNewFolder: true,
 	expandHitAreaPx: 8,
 };
 
@@ -107,6 +113,38 @@ export class SelectFolderSettingTab extends PluginSettingTab {
 					.setValue(this.plugin.settings.newNotesInSelectedFolder)
 					.onChange(async (value) => {
 						this.plugin.settings.newNotesInSelectedFolder = value;
+						await this.plugin.saveSettings();
+					}),
+			);
+
+		new Setting(containerEl)
+			.setName("New folders go into the selected folder")
+			.setDesc(
+				"When a folder is selected in the file explorer, the " +
+					"\"Create new folder in selected folder\" command of this " +
+					"plugin creates the folder inside it instead of the vault root.",
+			)
+			.addToggle((toggle) =>
+				toggle
+					.setValue(this.plugin.settings.newFoldersInSelectedFolder)
+					.onChange(async (value) => {
+						this.plugin.settings.newFoldersInSelectedFolder = value;
+						await this.plugin.saveSettings();
+					}),
+			);
+
+		new Setting(containerEl)
+			.setName("Select the newly created folder")
+			.setDesc(
+				"After this plugin creates a folder, select it in the file " +
+					"explorer and expand it — so you can immediately create a " +
+					"note inside it with the standard \"Create new note\" command.",
+			)
+			.addToggle((toggle) =>
+				toggle
+					.setValue(this.plugin.settings.focusNewFolder)
+					.onChange(async (value) => {
+						this.plugin.settings.focusNewFolder = value;
 						await this.plugin.saveSettings();
 					}),
 			);
